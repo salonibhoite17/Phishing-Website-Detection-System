@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="This website is developed to identify the safety of URLs.">
+    <meta name="keywords" content="phishing url,phishing,cyber security,machine learning,classifier,python">
+    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Inline CSS for immediate styling (no external file needed) -->
+    {% comment %} <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: #343a40;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        header {
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            font-size: 16px;
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .url-input-group {
+            display: flex;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .url-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+        }
+        
+        .url-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .check-button {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .check-button:hover {
+            background-color: #0b5ed7;
+        }
+        
+        .check-button i {
+            margin-left: 8px;
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        
+        .url-display {
+            margin-bottom: 15px;
+            word-break: break-all;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 4px;
+            border-left: 3px solid #0d6efd;
+        }
+        
+        .prediction-text {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .safe-text {
+            color: #198754;
+        }
+        
+        .malicious-text {
+            color: #dc3545;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .continue-btn {
+            background-color: #198754;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .unsafe-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        footer {
+            border-top: 1px solid #e9ecef;
+            padding: 15px 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>  {% endcomment %}
+    <title>URL Phishing Detection</title>
+    
+</head>
+
+<body>
+    <div class="container">
+        <header style="background-color: #042353;" #042353;>
+            <h1 style=" color: white;">PHISHING URL DETECTION</h1>
+            <p class="subtitle" style="color: white;">Check if a website is safe to visit</p>
+        </header>
+        
+        <div class="main-content">
+            <form action="/" method="post" id="urlForm">
+                <div class="url-input-group">
+                    <div class="url-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        </svg>
+                    </div>
+                    <input type="text" class="url-input" name="url" id="url" 
+                        placeholder="Enter URL to check" 
+                        pattern="^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$" 
+                        required>
+                </div>
+                <button class="check-button" id="checkButton" type="submit">
+                    Check URL
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            {% if url %}
+            <div class="result-section">
+                <div class="url-display">
+                    <strong>Analyzed URL:</strong> <a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ url }}</a>
+                </div>
+                
+                <div id="prediction" class="prediction-text"></div>
+                
+                <div class="action-buttons">
+                    <button class="unsafe-btn" id="button2" onclick="confirmNavigation('{{url}}')" style="display:none">
+                        Still want to Continue
+                    </button>
+                    <button class="continue-btn" id="button1" onclick="window.open('{{url}}', '_blank')" style="display:none">
+                        Continue
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if error %}
+            <div style="margin-top: 15px; padding: 10px; background-color: #f8d7da; color: #721c24; border-radius: 4px;">
+                Error: {{ error }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <footer>
+            Team Detector
+        </footer>
+    </div>
+
+    <script>
+        function confirmNavigation(url) {
+            if (confirm('This URL might be unsafe. Are you sure you want to continue?')) {
+                window.open(url, '_blank');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlForm = document.getElementById('urlForm');
+            if (urlForm) {
+                urlForm.addEventListener('submit', function() {
+                    const checkButton = document.getElementById('checkButton');
+                    if (checkButton) {
+                        checkButton.innerHTML = 'Checking...';
+                        checkButton.disabled = true;
+                    }
+                });
+            }
+
+            // Process the score data if it exists
+            {% if xx != -1 %}
+                let x = parseFloat('{{ xx }}');
+                if (!isNaN(x)) {
+                    // Simple percentage calculation
+                    let percentage = Math.min(Math.max(x * 100, 0), 100);
+                    let safe = x >= 0.50;
+                    let label = `Website is ${Math.round(percentage)}% likely to be ${safe ? 'safe' : 'malicious'}`;
+                    
+                    const predictionElement = document.getElementById('prediction');
+                    predictionElement.innerHTML = label;
+                    predictionElement.classList.add(safe ? 'safe-text' : 'malicious-text');
+                    
+                    document.getElementById(safe ? "button1" : "button2").style.display = "block";
+                } else {
+                    document.getElementById("prediction").innerHTML = "Error processing URL safety score";
+                }
+            {% endif %}
+        });
+    </script>
+</body>
+</html>
